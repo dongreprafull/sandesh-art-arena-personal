@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <title>Admin Login — Sandesh Art Arena</title>
 <link rel="stylesheet" href="https://artarenastudio.com/assets/style.css">
 <link rel="stylesheet" href="https://artarenastudio.com/assets/artful-theme.css">
-<link rel="stylesheet" href="/assets/personal.css">
+<link rel="stylesheet" href="/assets/personal.css?v=<?= ASSET_VERSION ?>">
 </head>
 <body class="login-body">
 <div class="login-box">

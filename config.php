@@ -73,3 +73,7 @@ function current_user(): ?array {
 function base_url(): string {
     return '/';
 }
+
+// Bump this on every deploy that changes assets/personal.css, so browsers
+// (and Hostinger's long max-age cache) don't keep serving a stale copy.
+define('ASSET_VERSION', '3');

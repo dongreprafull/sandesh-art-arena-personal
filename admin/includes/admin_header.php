@@ -37,7 +37,7 @@ function nav_is_active(string $href, string $current, string $table): bool {
 <title><?= isset($pageTitle) ? e($pageTitle) . ' — Admin' : 'Admin' ?></title>
 <link rel="stylesheet" href="https://artarenastudio.com/assets/style.css">
 <link rel="stylesheet" href="https://artarenastudio.com/assets/artful-theme.css">
-<link rel="stylesheet" href="/assets/personal.css">
+<link rel="stylesheet" href="/assets/personal.css?v=<?= ASSET_VERSION ?>">
 </head>
 <body class="admin-body">
 <header class="admin-topbar">

@@ -20,7 +20,7 @@ $nav = [
 <meta name="description" content="<?= e($pageDescription ?? 'Sandesh Suradkar — artist, art studio, classes and school development projects. Part of Sandesh Art Arena.') ?>">
 <link rel="stylesheet" href="https://artarenastudio.com/assets/style.css">
 <link rel="stylesheet" href="https://artarenastudio.com/assets/artful-theme.css">
-<link rel="stylesheet" href="/assets/personal.css">
+<link rel="stylesheet" href="/assets/personal.css?v=<?= ASSET_VERSION ?>">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
