@@ -30,7 +30,7 @@ include __DIR__ . '/includes/header.php';
   <div class="grid-cards">
     <?php foreach ($items as $p): ?>
       <div class="tile">
-        <?php if ($p['image']): ?><img src="<?= e($p['image']) ?>" alt="<?= e($p['title']) ?>"><?php endif; ?>
+        <?php if ($p['image']): ?><img src="<?= e(img_url($p['image'])) ?>" alt="<?= e($p['title']) ?>"><?php endif; ?>
         <div class="tile-body">
           <?php if ($p['category']): ?><span class="tag"><?= e($p['category']) ?></span><?php endif; ?>
           <h3><?= e($p['title']) ?></h3>

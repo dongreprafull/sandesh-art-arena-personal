@@ -21,7 +21,7 @@ include __DIR__ . '/includes/header.php';
   <div class="grid-cards">
     <?php foreach ($portfolio as $p): ?>
       <div class="tile">
-        <img src="<?= e($p['image'] ?: 'https://artarenastudio.com/assets/three-sectors-artwork.png') ?>" alt="<?= e($p['title']) ?>">
+        <img src="<?= e(img_url($p['image']) ?: 'https://artarenastudio.com/assets/three-sectors-artwork.png') ?>" alt="<?= e($p['title']) ?>">
         <div class="tile-body">
           <?php if ($p['category']): ?><span class="tag"><?= e($p['category']) ?></span><?php endif; ?>
           <h3><?= e($p['title']) ?></h3>

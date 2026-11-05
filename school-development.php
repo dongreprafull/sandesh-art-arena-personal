@@ -14,7 +14,7 @@ include __DIR__ . '/includes/header.php';
   <div class="grid-cards">
     <?php foreach ($projects as $p): ?>
       <div class="tile">
-        <?php if ($p['image']): ?><img src="<?= e($p['image']) ?>" alt="<?= e($p['title']) ?>"><?php endif; ?>
+        <?php if ($p['image']): ?><img src="<?= e(img_url($p['image'])) ?>" alt="<?= e($p['title']) ?>"><?php endif; ?>
         <div class="tile-body">
           <h3><?= e($p['title']) ?></h3>
           <p><?= nl2br(e($p['description'] ?? '')) ?></p>

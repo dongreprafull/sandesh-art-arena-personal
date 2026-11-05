@@ -11,7 +11,7 @@ $tables = [
             'title' => ['label' => 'Title', 'type' => 'text', 'required' => true],
             'description' => ['label' => 'Description', 'type' => 'textarea'],
             'price' => ['label' => 'Price', 'type' => 'text'],
-            'image' => ['label' => 'Image URL', 'type' => 'text'],
+            'image' => ['label' => 'Image', 'type' => 'image'],
             'sort_order' => ['label' => 'Sort Order', 'type' => 'number'],
         ],
     ],
@@ -20,7 +20,7 @@ $tables = [
         'fields' => [
             'title' => ['label' => 'Title', 'type' => 'text', 'required' => true],
             'description' => ['label' => 'Description', 'type' => 'textarea'],
-            'image' => ['label' => 'Image URL', 'type' => 'text'],
+            'image' => ['label' => 'Image', 'type' => 'image'],
             'sort_order' => ['label' => 'Sort Order', 'type' => 'number'],
         ],
     ],
@@ -30,7 +30,7 @@ $tables = [
             'title' => ['label' => 'Title', 'type' => 'text', 'required' => true],
             'category' => ['label' => 'Category', 'type' => 'text'],
             'description' => ['label' => 'Description', 'type' => 'textarea'],
-            'image' => ['label' => 'Image URL', 'type' => 'text'],
+            'image' => ['label' => 'Image', 'type' => 'image'],
             'sort_order' => ['label' => 'Sort Order', 'type' => 'number'],
         ],
     ],
@@ -39,7 +39,7 @@ $tables = [
         'fields' => [
             'title' => ['label' => 'Title', 'type' => 'text'],
             'item_type' => ['label' => 'Type', 'type' => 'select', 'options' => ['photo' => 'Photo', 'video' => 'Video']],
-            'url' => ['label' => 'File URL', 'type' => 'text', 'required' => true],
+            'url' => ['label' => 'Photo / Video File', 'type' => 'media'],
             'album' => ['label' => 'Album', 'type' => 'text'],
             'sort_order' => ['label' => 'Sort Order', 'type' => 'number'],
         ],
@@ -91,10 +91,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)($_POST['id'] ?? 0);
         $cols = [];
         $vals = [];
+        $existingRow = null;
+        if ($id) {
+            $stmt = $pdo->prepare("SELECT * FROM `$table` WHERE id = ?");
+            $stmt->execute([$id]);
+            $existingRow = $stmt->fetch();
+        }
         foreach ($fields as $name => $f) {
             if ($f['type'] === 'checkbox') {
                 $cols[] = $name;
                 $vals[] = isset($_POST[$name]) ? 1 : 0;
+            } elseif ($f['type'] === 'image') {
+                $cols[] = $name;
+                $vals[] = handle_upload($name, $existingRow[$name] ?? null, 'uploads/images');
+            } elseif ($f['type'] === 'media') {
+                $cols[] = $name;
+                $vals[] = handle_upload($name, $existingRow[$name] ?? null, 'uploads/gallery', ['jpg', 'jpeg', 'png', 'webp', 'gif', 'mp4', 'webm', 'mov']);
             } else {
                 $v = trim($_POST[$name] ?? '');
                 $cols[] = $name;
@@ -127,13 +139,25 @@ $rows = $pdo->query("SELECT * FROM `$table` ORDER BY " . (isset($fields['sort_or
 <h1><?= e($conf['label']) ?></h1>
 
 <h3><?= $editRow ? 'Edit' : 'Add New' ?></h3>
-<form class="admin-form" method="post">
+<form class="admin-form" method="post" enctype="multipart/form-data">
   <input type="hidden" name="action" value="save">
   <input type="hidden" name="id" value="<?= $editRow['id'] ?? 0 ?>">
   <?php foreach ($fields as $name => $f): $val = $editRow[$name] ?? ''; ?>
     <label>
       <?= e($f['label']) ?><?= !empty($f['required']) ? ' *' : '' ?><br>
-      <?php if ($f['type'] === 'textarea'): ?>
+      <?php if ($f['type'] === 'image' || $f['type'] === 'media'): ?>
+        <?php if (!empty($val)): ?>
+          <div style="margin:.3rem 0">
+            <?php if ($f['type'] === 'media' && preg_match('/\.(mp4|webm|mov)$/i', $val)): ?>
+              <video src="<?= e(img_url($val)) ?>" style="max-width:200px;border-radius:6px" controls></video>
+            <?php else: ?>
+              <img src="<?= e(img_url($val)) ?>" alt="" style="max-width:140px;border-radius:6px;display:block">
+            <?php endif; ?>
+          </div>
+        <?php endif; ?>
+        <input type="file" name="<?= $name ?>" accept="<?= $f['type'] === 'media' ? 'image/*,video/*' : 'image/*' ?>">
+        <p class="muted" style="margin-top:.25rem;font-size:.8rem"><?= $val ? 'Choose a new file to replace it, or leave blank to keep the current one.' : 'Upload a file.' ?></p>
+      <?php elseif ($f['type'] === 'textarea'): ?>
         <textarea name="<?= $name ?>" rows="3"><?= e($val) ?></textarea>
       <?php elseif ($f['type'] === 'select'): ?>
         <select name="<?= $name ?>">
@@ -165,7 +189,19 @@ $rows = $pdo->query("SELECT * FROM `$table` ORDER BY " . (isset($fields['sort_or
   <?php foreach ($rows as $r): ?>
   <tr>
     <?php foreach ($fields as $name => $f): ?>
-      <td><?= $f['type'] === 'checkbox' ? ($r[$name] ? 'Yes' : 'No') : e(mb_strimwidth((string)$r[$name], 0, 60, '…')) ?></td>
+      <td>
+        <?php if ($f['type'] === 'checkbox'): ?>
+          <?= $r[$name] ? 'Yes' : 'No' ?>
+        <?php elseif (($f['type'] === 'image' || $f['type'] === 'media') && !empty($r[$name])): ?>
+          <?php if ($f['type'] === 'media' && preg_match('/\.(mp4|webm|mov)$/i', (string) $r[$name])): ?>
+            <a href="<?= e(img_url($r[$name])) ?>" target="_blank">Video ↗</a>
+          <?php else: ?>
+            <img src="<?= e(img_url($r[$name])) ?>" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:5px">
+          <?php endif; ?>
+        <?php else: ?>
+          <?= e(mb_strimwidth((string)$r[$name], 0, 60, '…')) ?>
+        <?php endif; ?>
+      </td>
     <?php endforeach; ?>
     <td class="admin-actions" style="text-align:right;white-space:nowrap">
       <a class="btn ghost" style="padding:.3rem .7rem;font-size:.75rem" href="/admin/content.php?table=<?= urlencode($table) ?>&edit=<?= $r['id'] ?>">Edit</a>
