@@ -149,28 +149,30 @@ $rows = $pdo->query("SELECT * FROM `$table` ORDER BY " . (isset($fields['sort_or
     </label>
   <?php endforeach; ?>
   <div>
-    <button class="btn" type="submit"><?= $editRow ? 'Save Changes' : 'Add' ?></button>
-    <?php if ($editRow): ?><a class="btn secondary" href="/admin/content.php?table=<?= urlencode($table) ?>">Cancel</a><?php endif; ?>
+    <button class="btn primary" type="submit"><?= $editRow ? 'Save Changes' : 'Add' ?></button>
+    <?php if ($editRow): ?><a class="btn ghost" href="/admin/content.php?table=<?= urlencode($table) ?>">Cancel</a><?php endif; ?>
   </div>
 </form>
 
-<h3 style="margin-top:2.2rem">All Entries</h3>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:2.2rem">
+  <h3>All Entries (<?= count($rows) ?>)</h3>
+</div>
 <table class="admin-table">
   <tr>
     <?php foreach ($fields as $name => $f): ?><th><?= e($f['label']) ?></th><?php endforeach; ?>
-    <th>Actions</th>
+    <th style="text-align:right">Actions</th>
   </tr>
   <?php foreach ($rows as $r): ?>
   <tr>
     <?php foreach ($fields as $name => $f): ?>
       <td><?= $f['type'] === 'checkbox' ? ($r[$name] ? 'Yes' : 'No') : e(mb_strimwidth((string)$r[$name], 0, 60, '…')) ?></td>
     <?php endforeach; ?>
-    <td class="admin-actions">
-      <a href="/admin/content.php?table=<?= urlencode($table) ?>&edit=<?= $r['id'] ?>">Edit</a>
+    <td class="admin-actions" style="text-align:right;white-space:nowrap">
+      <a class="btn ghost" style="padding:.3rem .7rem;font-size:.75rem" href="/admin/content.php?table=<?= urlencode($table) ?>&edit=<?= $r['id'] ?>">Edit</a>
       <form method="post" style="display:inline" onsubmit="return confirm('Delete this entry?')">
         <input type="hidden" name="action" value="delete">
         <input type="hidden" name="id" value="<?= $r['id'] ?>">
-        <button class="btn danger" type="submit" style="padding:.25rem .6rem;font-size:.75rem">Delete</button>
+        <button class="btn danger" type="submit" style="padding:.3rem .7rem;font-size:.75rem">Delete</button>
       </form>
     </td>
   </tr>
